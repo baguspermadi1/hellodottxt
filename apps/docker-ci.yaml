@@ -1,0 +1,31 @@
+docker-build:
+  # Official docker image.
+  image: docker:latest
+  stage: build
+  only: 
+    - master
+  tags:
+    - master
+  script:
+    - docker login -u ${DOCKER_USER} -p ${DOCKER_PASSWORD} https://${URL_REGISTRY}
+    - docker build --pull -t "$URL_REGISTRY:$CI_COMMIT_SHORT_SHA" -f ./apps/Dockerfile .
+    - docker push "$URL_REGISTRY:$CI_COMMIT_SHORT_SHA"
+
+before_script:
+  - apt-get update -qq
+  - apt-get install -qq git
+  # Setup SSH deploy keys
+  - 'which ssh-agent || ( apt-get install -qq openssh-client )'
+  - eval $(ssh-agent -s)
+  - ssh-add <(echo "$SSH_PRIVATE_KEY")
+  - mkdir -p ~/.ssh
+  - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+    
+deploy:
+  type: deploy
+  environment:
+    name: test
+  script:
+    - ssh root@$IP_SERVER "docker run --name web_server -d -p 8080:80 nginx"
+  only:
+    - master
