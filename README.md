@@ -38,3 +38,5 @@ Now, assuming we have ssh connection to our server, and docker, git is installed
 4. Add a new variable DOCKER_USER, DOCKER_PASSWORD, URL_REGISTRY. The value is about our docker authentication registry.
 
 5. Add a new variable IP_SERVER. the value is ip server apps
+
+6. Push to gitlab repository
